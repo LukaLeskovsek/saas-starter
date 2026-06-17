@@ -15,11 +15,14 @@ product, not the plumbing.
 You can ask Claude Code to do each step with you — that's the point.
 
 ### 1. Get the code
+On GitHub, click **"Use this template" → Create a new repository** (so you get your
+own copy to push to), then:
 ```bash
-git clone <your-fork-of-this-repo>
+git clone https://github.com/<your-username>/saas-starter.git
 cd saas-starter
 npm install
 ```
+Template source: https://github.com/LukaLeskovsek-ZebraBI/saas-starter
 
 ### 2. Create your Supabase project
 - supabase.com → **New project** (pick the EU region; remember the database password).
