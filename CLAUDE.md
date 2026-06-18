@@ -45,6 +45,10 @@ missing, ask for them rather than inventing a voice.
   copy the `requests` shape (a table with `user_id`, RLS, a form, a list).
 - **After any change**, run `npm run lint && npm run build` before saying you're done.
 
+## Your build loop (skills in `.claude/skills/`)
+
+Drive the work with these, in order: **`/plan`** (shape the idea, no code) → **`/build`** (one slice, keep it green, commit) → **`/verify`** (run it and prove it works) → **`/debug`** (only if it breaks) → **`/ship`** (go live and confirm the public URL). On Day 3 you'll meet the "pro" version of this loop — Compound Engineering (`/ce-plan` …).
+
 ## Build/run
 
 - `npm run dev` — local dev server.
