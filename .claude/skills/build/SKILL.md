@@ -11,7 +11,7 @@ When invoked, implement **one** slice (the next one from `/plan`) inside the rep
 ## Steps
 1. State the one slice you're doing (one sentence).
 2. Make the change. Imitate the `requests` feature for anything new (form → RLS table → list).
-3. New table? Add it with **RLS policies in the same migration** (owner-scoped). Never an unprotected table.
+3. New table? Add it with **RLS policies in the same migration** (owner-scoped). Never an unprotected table. **Then tell the user to RUN that migration in Supabase** (SQL Editor → paste → Run) — you can't run it for them, and the feature silently fails until the table exists.
 4. Run `npm run lint && npm run build`. If it's red, fix it before going further.
 5. Show the user the diff in plain language — what changed, and why.
 6. Commit with a clear message. **Stop** — don't start the next slice.
