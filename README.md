@@ -28,16 +28,23 @@ Template source: https://github.com/LukaLeskovsek/saas-starter
 - supabase.com → **New project** (pick the EU region; remember the database password).
 - **Turn off email confirmation:** Authentication → Sign In / Providers → Email →
   toggle **"Confirm email" OFF**. (Sign-in then works instantly, no email needed.)
-- Run the database setup: SQL Editor → paste the contents of
-  `supabase/migrations/0001_init.sql` → **Run**.
+- Copy your **Project URL** + **anon key** (Settings → API). Claude sets up the
+  database for you in the next step — no SQL pasting.
 
-### 3. Fill in your keys
+### 3. Fill in your keys, then let Claude set up the database
 ```bash
 cp .env.example .env.local
 ```
-Then open `.env.local` and fill it in — Claude Code can walk you through it one
-line at a time. You need your Supabase URL + anon key (and, when ready, your
-Resend key and Sentry DSN).
+Open `.env.local` and fill in your Supabase URL + anon key, plus a **Supabase
+access token** (supabase.com → Account → Access Tokens) so Claude can run your
+database setup. Add your Resend key and Sentry DSN when ready — Claude Code can
+walk you through it one line at a time.
+
+Then ask Claude: **"run the database migration."** It applies the schema for you:
+```bash
+npm run db:run -- supabase/migrations/0001_init.sql
+```
+*(No access token? The command tells you to paste the file into Supabase → SQL Editor instead.)*
 
 ### 4. Run it locally
 ```bash
