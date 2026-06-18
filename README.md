@@ -22,7 +22,7 @@ git clone https://github.com/<your-username>/saas-starter.git
 cd saas-starter
 npm install
 ```
-Template source: https://github.com/LukaLeskovsek-ZebraBI/saas-starter
+Template source: https://github.com/LukaLeskovsek/saas-starter
 
 ### 2. Create your Supabase project
 - supabase.com → **New project** (pick the EU region; remember the database password).
