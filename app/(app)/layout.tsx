@@ -1,11 +1,11 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { ToastFromParams } from "@/components/toast-from-params";
 
 // Auth guard for the whole signed-in area. DONE — do not modify.
-// Any route under (app) is only reachable with a valid session; otherwise we
-// redirect to /login. This runs on the server on every request.
 export default async function AppLayout({
   children,
 }: {
@@ -27,6 +27,9 @@ export default async function AppLayout({
         {children}
       </main>
       <Footer />
+      <Suspense>
+        <ToastFromParams />
+      </Suspense>
     </div>
   );
 }
