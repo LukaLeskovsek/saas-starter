@@ -49,6 +49,15 @@ missing, ask for them rather than inventing a voice.
 
 Drive the work with these, in order: **`/plan`** (shape the idea, no code) → **`/build`** (one slice, keep it green, commit) → **`/verify`** (run it and prove it works) → **`/debug`** (only if it breaks) → **`/ship`** (go live and confirm the public URL). On Day 3 you'll meet the "pro" version of this loop — Compound Engineering (`/ce-plan` …).
 
+## Design system (shadcn/ui)
+
+The UI is shadcn/ui (Base UI + Tailwind v4) in a premium-neutral style. Rebrand via the
+tokens at the top of `app/globals.css` (`--primary`, `--radius`) — not component files.
+**Every Server Action form submits with `<SubmitButton>`** (`components/ui/submit-button.tsx`),
+which shows a spinner and disables while pending (no double-submit). Action results surface
+as toasts via `?ok=` / `?error=`. Signed-in pages live under `app/(app)/` so they inherit
+the padded shell + header. Match these patterns for new UI.
+
 ## Build/run
 
 - `npm run dev` — local dev server.
