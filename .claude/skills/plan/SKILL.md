@@ -5,6 +5,9 @@ description: Shape a feature idea into a small, ordered build plan before any co
 
 When invoked, turn the user's idea into the smallest sensible plan — then stop. Do not write code; `/build` does that.
 
+## Ideate first (if the idea is fuzzy)
+If the user only has a rough direction, spend one quick exchange exploring: offer **2–3 concrete feature options** (one sentence each, smallest-useful framing — and note where an **AI step** would add value, since this is an AI app). Let them pick one, then shape it. Skip this if the idea is already concrete.
+
 ## Ask first (don't invent)
 If the idea is vague, ask up to **2** short questions (What should it do for the user? What's the one must-have?). If a fact is missing, ask — never guess.
 

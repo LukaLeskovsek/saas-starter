@@ -15,7 +15,8 @@ missing, ask for them rather than inventing a voice.
 
 - `app/(marketing)/page.tsx` — the landing page. **This is the main rebrand target.**
 - `app/globals.css` — brand colours (CSS variables at the top). Change colour here, not in components.
-- `app/(app)/feature/` — the worked example "requests" feature (form → table → list). **Imitate this shape** for the founder's own feature.
+- `app/(app)/feature/` — the worked example "requests" feature, an **AI feature**: form → table → **LLM call** (triage + draft reply) → list. **Imitate this shape** for the founder's own AI feature.
+- `lib/ai.ts` — the **server-only** LLM helper (OpenRouter via the OpenAI SDK, default Claude, mock-mode when no key). All AI calls go through `generate()`. Never call it from a client component.
 - `app/(app)/dashboard/` — the signed-in shell.
 - `supabase/migrations/` — database schema + Row Level Security (RLS) policies.
 - `lib/`, `app/login/` — auth, Supabase clients, email. Pre-built.
@@ -41,13 +42,16 @@ missing, ask for them rather than inventing a voice.
   ```
 - **Secrets only via environment variables.** If a key ever appears in code, stop
   and move it to `.env.local`. Never use `NEXT_PUBLIC_` for a server secret.
+- **AI calls are server-side, through `lib/ai.ts`.** Never call an LLM from a client
+  component or expose `OPENROUTER_API_KEY` to the browser. Store AI output in an
+  RLS-scoped table, the same as any other data. Use `/integrate-ai` to add one.
 - **Prefer editing the worked example** over inventing new structure. New feature =
   copy the `requests` shape (a table with `user_id`, RLS, a form, a list).
 - **After any change**, run `npm run lint && npm run build` before saying you're done.
 
 ## Your build loop (skills in `.claude/skills/`)
 
-Drive the work with these, in order: **`/plan`** (shape the idea, no code) → **`/build`** (one slice, keep it green, commit) → **`/verify`** (run it and prove it works) → **`/debug`** (only if it breaks) → **`/ship`** (go live and confirm the public URL). On Day 3 you'll meet the "pro" version of this loop — Compound Engineering (`/ce-plan` …).
+Drive the work with these, in order: **`/plan`** (ideate + shape the idea, no code) → **`/build`** (one slice, keep it green, commit) → **`/verify`** (run it and prove it works) → **`/debug`** (only if it breaks) → **`/ship`** (go live and confirm the public URL). To add an AI feature, **`/integrate-ai`** (server-side LLM via `lib/ai.ts`). On Day 3 you'll meet the "pro" version of this loop — Compound Engineering (`/ce-plan` …).
 
 ## Design system (shadcn/ui)
 

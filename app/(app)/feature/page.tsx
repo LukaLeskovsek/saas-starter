@@ -10,14 +10,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-// The worked example feature: form → table → list, scoped per-user by RLS.
-// REPLACE THIS with your own feature, keeping the same shape.
+// The worked example feature: form → table → AI call → list, scoped per-user by
+// RLS. The AI triages each request and drafts a reply (lib/ai.ts → OpenRouter).
+// REPLACE THIS with your own AI feature, keeping the same shape.
 export default async function FeaturePage() {
   const supabase = await createClient();
   // RLS guarantees this only ever returns the signed-in user's own rows.
   const { data: requests } = await supabase
     .from("requests")
-    .select("id, name, message, amount, created_at")
+    .select("id, name, message, amount, ai_draft, created_at")
     .order("created_at", { ascending: false });
   const rows = requests ?? [];
 
@@ -26,7 +27,8 @@ export default async function FeaturePage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Requests</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          The form writes to a table (owner-only via RLS); the list shows only your rows.
+          The form writes to a table (owner-only via RLS); AI triages each request and
+          drafts a reply; the list shows only your rows.
         </p>
       </div>
 
@@ -65,15 +67,27 @@ export default async function FeaturePage() {
           <div className="space-y-3">
             {rows.map((r) => (
               <Card key={r.id} size="sm">
-                <CardContent className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className="font-medium">{r.name}</div>
-                    <p className="mt-0.5 text-sm text-muted-foreground">{r.message}</p>
+                <CardContent className="space-y-3">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <div className="font-medium">{r.name}</div>
+                      <p className="mt-0.5 text-sm text-muted-foreground">{r.message}</p>
+                    </div>
+                    {r.amount != null ? (
+                      <span className="shrink-0 text-sm tabular-nums text-muted-foreground">
+                        {r.amount}
+                      </span>
+                    ) : null}
                   </div>
-                  {r.amount != null ? (
-                    <span className="shrink-0 text-sm tabular-nums text-muted-foreground">
-                      {r.amount}
-                    </span>
+                  {r.ai_draft ? (
+                    <div className="rounded-md border border-border bg-muted/40 p-3">
+                      <div className="text-xs font-medium uppercase tracking-wide text-primary">
+                        AI triage + suggested reply
+                      </div>
+                      <p className="mt-1 whitespace-pre-line text-sm text-muted-foreground">
+                        {r.ai_draft}
+                      </p>
+                    </div>
                   ) : null}
                 </CardContent>
               </Card>
