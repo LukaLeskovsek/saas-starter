@@ -14,15 +14,17 @@ product, not the plumbing.
 
 You can ask Claude Code to do each step with you — that's the point.
 
-### 1. Get the code
-On GitHub, click **"Use this template" → Create a new repository** (so you get your
-own copy to push to), then:
+### 1. Get the code — your own repo
+On GitHub, click **"Use this template" → Create a new repository** and set it
+**Private** (so you get your own copy to push to — it holds your app *and its
+history*), then:
 ```bash
 git clone https://github.com/<your-username>/saas-starter.git
 cd saas-starter
 npm install
 ```
 Template source: https://github.com/LukaLeskovsek/saas-starter
+New to git? Three safe verbs and one rule: [docs/git-basics.md](docs/git-basics.md).
 
 ### 2. Create your Supabase project
 - supabase.com → **New project** (pick the EU region; remember the database password).

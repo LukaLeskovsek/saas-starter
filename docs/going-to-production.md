@@ -16,7 +16,12 @@ to try something risky without touching your live site:
 git checkout -b try-new-headline
 # ...changes, commit, push...
 ```
-Vercel comments the preview URL on the push. When you're happy, merge to `main`.
+Vercel comments the preview URL on the push. When you're happy, ask Claude to merge it
+into `main` (a local merge — no pull request while you're solo; see `workflow-mode.md`).
+
+**Undo safely.** Broke something? `git revert` to the last good commit — never
+`git reset --hard` or `git push --force`. The three safe verbs are in
+[git-basics.md](git-basics.md).
 
 ## Environment variables
 

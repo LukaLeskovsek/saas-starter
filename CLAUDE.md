@@ -48,10 +48,24 @@ missing, ask for them rather than inventing a voice.
 - **Prefer editing the worked example** over inventing new structure. New feature =
   copy the `requests` shape (a table with `user_id`, RLS, a form, a list).
 - **After any change**, run `npm run lint && npm run build` before saying you're done.
+- **Undo via `git revert`, never `git reset --hard` or `git push --force`.** If a change
+  broke a working state, revert to the last good commit (a new commit that restores it)
+  and re-verify from there. The commit history is the founder's safety net — keep it intact.
 
 ## Your build loop (skills in `.claude/skills/`)
 
 Drive the work with these, in order: **`/plan`** (ideate + shape the idea, no code) → **`/build`** (one slice, keep it green, commit) → **`/verify`** (run it and prove it works) → **`/debug`** (only if it breaks) → **`/ship`** (go live and confirm the public URL). To add an AI feature, **`/integrate-ai`** (server-side LLM via `lib/ai.ts`). On Day 3 you'll meet the "pro" version of this loop — Compound Engineering (`/ce-plan` …).
+
+## Workflow mode — pull requests OFF
+
+**Pull requests: OFF** — solo founder, trunk-based.
+
+While OFF:
+- `/build` commits; `/ship` pushes straight to `main` (push = deploy).
+- A risky change may use a short-lived branch for a preview URL, then **merge into `main` locally** (`git checkout main && git merge <branch> && git push`). **Never open a pull request while this is OFF.**
+- Undo with `git revert`; never `git reset --hard` or `git push --force`.
+
+To turn pull requests ON (a teammate joins, or you want review before deploy), change the line above to `Pull requests: ON` and see `docs/workflow-mode.md`. When ON, `/ship` opens a PR (`gh pr create`) and merges when checks pass.
 
 ## Design system (shadcn/ui)
 

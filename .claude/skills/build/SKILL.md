@@ -20,4 +20,5 @@ When invoked, implement **one** slice (the next one from `/plan`) inside the rep
 - Never modify `app/login/`, `lib/supabase/`, `lib/email.ts`, the Sentry config, or a migration that already ran.
 - Secrets only via env — if a key appears in code, stop and move it to `.env.local`.
 - Keep the tree green: lint + build must pass before you commit.
+- **Commit only — never push or open a pull request.** Going live is `/ship`'s job; pull requests stay OFF unless `CLAUDE.md` Workflow mode says ON.
 - After building, suggest: *"`/verify` to prove it works."*
