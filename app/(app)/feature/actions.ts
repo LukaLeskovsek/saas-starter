@@ -9,6 +9,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { sendRequestConfirmation } from "@/lib/email";
 import { generate } from "@/lib/ai";
+import { AiDailyLimitError, recordAiUsage } from "@/lib/ai-budget";
 
 const RequestSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -53,6 +54,7 @@ export async function createRequest(formData: FormData) {
   // row; mock-mode returns canned text when no key is set. THIS is the AI pattern
   // to imitate for your own feature — see /integrate-ai.
   try {
+    await recordAiUsage(supabase, "requests");
     const { text } = await generate({
       system:
         "You are a concise, friendly support assistant. Keep replies to 2–3 sentences.",
@@ -60,6 +62,9 @@ export async function createRequest(formData: FormData) {
     });
     await supabase.from("requests").update({ ai_draft: text }).eq("id", inserted!.id);
   } catch (e) {
+    if (e instanceof AiDailyLimitError) {
+      redirect("/feature?error=Daily+AI+limit+reached.+Try+again+tomorrow.");
+    }
     console.error("AI draft failed", e);
   }
 

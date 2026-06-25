@@ -45,6 +45,8 @@ walk you through it one line at a time.
 Then ask Claude: **"run the database migration."** It applies the schema for you:
 ```bash
 npm run db:run -- supabase/migrations/0001_init.sql
+npm run db:run -- supabase/migrations/0002_ai.sql
+npm run db:run -- supabase/migrations/0003_ai_usage.sql
 ```
 *(No access token? The command tells you to paste the file into Supabase → SQL Editor instead.)*
 
@@ -77,7 +79,9 @@ More on domains, preview deployments, and staging: see [docs/going-to-production
 - `npm run build` — production build (also type-checks)
 - `npm run lint` — lint
 - `npm start` — run the production build locally
+- `npm run audit:security` — fail on high/critical npm advisories
 
 ## Notes
 - A Supabase "Edge Runtime / `process.version`" warning on build is expected and harmless.
 - Secrets live in `.env.local` and in Vercel — never in code, never in chat.
+- Security notes: [docs/security.md](docs/security.md).
