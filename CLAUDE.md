@@ -76,6 +76,29 @@ which shows a spinner and disables while pending (no double-submit). Action resu
 as toasts via `?ok=` / `?error=`. Signed-in pages live under `app/(app)/` so they inherit
 the padded shell + header. Match these patterns for new UI.
 
+## Design rules — make it beautiful, not generic
+
+When building or restyling any UI (especially the landing page), design with
+intent and avoid the generic "AI slop" look:
+
+- **Plan before code.** For any new page, first propose a compact design plan —
+  a 4–6 colour palette, 2 distinctive typefaces (display + body), a layout
+  concept, and ONE signature element the page is remembered by. Confirm it isn't
+  a generic default, then write code to that plan.
+- **Fonts:** never use Inter, Roboto, Open Sans, Lato, Arial, or system fonts;
+  avoid Space Grotesk too. Pick distinctive typefaces that fit the brand (set
+  them in `app/layout.tsx` via `next/font`).
+- **Colour:** no clichéd schemes — especially no purple gradients on white.
+  Drive everything from the brand tokens in `app/globals.css`; *extend* them
+  (e.g. an accent, or a dark hero surface token) rather than hardcoding hex in
+  components.
+- **Contrast & rhythm:** use extremes, not safe middles — weights 100/200 vs
+  800/900 (not 400 vs 600), size jumps of 3x+ (not 1.5x), generous whitespace,
+  atmosphere over flat colour.
+- **Verify visually:** after a UI change, view the rendered page (screenshot it),
+  compare to the intended design, list what's off, and fix it before saying
+  you're done.
+
 ## Build/run
 
 - `npm run dev` — local dev server.
