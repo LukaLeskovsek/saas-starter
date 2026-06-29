@@ -75,6 +75,7 @@ More on domains, preview deployments, and staging: see [docs/going-to-production
 ---
 
 ## Scripts
+- `npm install` — install dependencies
 - `npm run dev` — local dev server
 - `npm run build` — production build (also type-checks)
 - `npm run lint` — lint
