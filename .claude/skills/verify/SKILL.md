@@ -14,6 +14,7 @@ When invoked, don't *say* it works — *show* it. Run the app, walk the real flo
    - **RLS isolation:** with a *second* account, confirm you **cannot** see the first account's rows.
    - **No secret leaks:** after `npm run build`, grep `.next/` — `SUPABASE_SERVICE_ROLE_KEY` (and any server secret) must be **absent** from the client bundle.
 4. Report a checklist of ✓ / ✗ with what you actually saw — not "should work."
+5. **Save the evidence.** Append `docs/features/<slug>/runs/<YYYY-MM-DD-HHMM>-verify.md` with that ✓/✗ checklist and a PASS/FAIL verdict (format in `docs/features/README.md`). On all-✓, set the Card's `status: verified` and bump `verified_runs` by 1 — that counter is the gate before you treat the feature as trusted.
 
 ## Rules
 - "Works" means you ran it and watched it happen. No assumptions.
