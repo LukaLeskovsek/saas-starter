@@ -12,6 +12,9 @@
 import "server-only";
 import OpenAI from "openai";
 import { spawn } from "node:child_process";
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 // Cheap + fast default for a workshop (the key is capped). Verify the current slug
 // at openrouter.ai/models; bump to a stronger Claude model if you want.
@@ -36,7 +39,7 @@ export function aiConfigured(): boolean {
 /**
  * One LLM call: text in, text out. No key set (first local run, CI, or a founder
  * who hasn't added one yet) → mock mode, so the feature still works end-to-end
- * with zero spend. Same idea as the Resend / Intrix fallbacks.
+ * with zero spend. Same idea as the Resend fallback.
  */
 export async function generate(params: {
   prompt: string;
@@ -76,52 +79,93 @@ export async function generate(params: {
  *
  * SECURITY: the (untrusted) prompt is written to the child's STDIN, never passed
  * as an argv element — so a prompt that starts with "-" can't be smuggled in as a
- * claude flag (argv injection). Only fixed flags are passed as args. We also scrub
+ * claude flag (argv injection). Only fixed flags are passed as args, plus the
+ * feature's system line as a single `--system-prompt=…` argument. We also scrub
  * ANTHROPIC_API_KEY from the child env — if set, Claude Code bills pay-as-you-go
  * API instead of the subscription (a documented surprise-bill footgun). Needs the
  * Node.js runtime, not Edge — Server Actions run on Node by default.
  */
-function generateViaLocalClaude(params: {
+async function generateViaLocalClaude(params: {
   prompt: string;
   system?: string;
 }): Promise<{ text: string; mock: boolean }> {
+  const text = await runLocalClaude({ system: params.system, stdin: params.prompt });
+  return text ? { text, mock: false } : { text: mockOutput(), mock: true };
+}
+
+/** Runs `claude -p` isolated; resolves the answer text, or null on any failure. */
+function runLocalClaude({ system, stdin }: { system?: string; stdin: string }): Promise<string | null> {
   const env = { ...process.env };
   delete env.ANTHROPIC_API_KEY; // force subscription auth, never pay-as-you-go
 
-  const input = params.system
-    ? `${params.system}\n\n---\n\n${params.prompt}`
-    : params.prompt;
+  // The feature's system line REPLACES Claude Code's own system prompt, so the
+  // answer comes from the app's instructions, not a coding agent's.
+  const systemLine = system ?? "Si jedrnat in prijazen pomočnik. Odgovarjaj v slovenščini.";
 
   // Optional: point AI_BRAIN_DIR at a company-brain folder and Claude auto-loads
   // that folder's CLAUDE.md / PERSON / COMPANY / BRAND as grounding. Omit to run
-  // without it (don't point it at this app's root — that loads the dev rules).
-  const cwd = process.env.AI_BRAIN_DIR || undefined;
+  // without it. Never default to this app's root (the server's cwd) — that loads
+  // the dev rules in CLAUDE.md into every answer — so blank means a private empty dir.
+  const cwd = process.env.AI_BRAIN_DIR || neutralDir();
 
   return new Promise((resolve) => {
-    const mock = () => resolve({ text: mockOutput(), mock: true });
     // Only FIXED flags are argv; the prompt goes on stdin (see SECURITY above).
-    const child = spawn("claude", ["-p", "--output-format", "text"], { env, cwd });
+    // Isolation: without these flags the child inherits the operator's own Claude
+    // Code setup — global settings, plugins, MCP servers (mail, Slack, Jira…),
+    // memory — and app users' answers would be grounded in (and able to act
+    // through) the operator's personal tools. So: no user settings, no MCP, no
+    // tools at all — text in, text out. (The subscription login still identifies
+    // the operator's account; that's inherent to local-claude, which is why it is
+    // for your own machine only.)
+    const args = [
+      "-p",
+      "--output-format", "text",
+      "--setting-sources", "project",
+      "--strict-mcp-config",
+      "--tools", "",
+      // `=` form: the value can never be parsed as another flag, even if it
+      // starts with "-".
+      `--system-prompt=${systemLine}`,
+    ];
+    const child = spawn("claude", args, { env, cwd });
     let out = "";
-    const timer = setTimeout(() => { child.kill("SIGKILL"); mock(); }, 120_000);
+    let settled = false;
+    const done = (v: string | null) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve(v);
+    };
+    const timer = setTimeout(() => { child.kill("SIGKILL"); done(null); }, 120_000);
     child.stdout.on("data", (d) => {
       out += d.toString();
       if (out.length > 8 * 1024 * 1024) child.kill("SIGKILL"); // cap runaway output
     });
-    child.on("error", () => { clearTimeout(timer); mock(); }); // claude not installed
+    child.on("error", () => done(null)); // claude not installed
     child.on("close", (code) => {
-      clearTimeout(timer);
-      if (code === 0 && out.trim()) resolve({ text: out.trim(), mock: false });
-      else mock(); // not logged in / non-zero / empty → mock
+      done(code === 0 && out.trim() ? out.trim() : null); // not logged in / failed → null
     });
     child.stdin.on("error", () => {}); // ignore EPIPE if the child exits early
-    child.stdin.end(input);
+    child.stdin.end(stdin);
   });
 }
 
+// A private (0700), empty working dir for `claude -p`. Never the shared /tmp
+// itself: Claude Code loads CLAUDE.md and .claude/settings.json (hooks!) from its
+// cwd, so a world-writable dir would let another local user inject config.
+let privateDir: string | undefined;
+function neutralDir(): string {
+  privateDir ??= mkdtempSync(join(tmpdir(), "saas-starter-ai-"));
+  return privateDir;
+}
+
 function mockOutput(): string {
-  return [
-    "[mock AI — set OPENROUTER_API_KEY in .env.local for real output]",
-    "Triage: general · normal priority.",
-    "Suggested reply: Thanks for reaching out — we've received your message and will follow up shortly.",
-  ].join("\n");
+  // Shown to people, so Slovenian and free of developer words. The "why" goes
+  // to the server log for whoever runs the app.
+  console.warn(
+    BACKEND === "local-claude"
+      ? "[ai] AI_BACKEND=local-claude but `claude -p` failed — is Claude Code installed and logged in?"
+      : "[ai] No OPENROUTER_API_KEY — returning a demo answer.",
+  );
+  return "Demo odgovor: AI še ni povezan, zato je to vzorčno besedilo. Ko ga skrbnik poveže, boš tu dobil pravi odgovor.";
 }
