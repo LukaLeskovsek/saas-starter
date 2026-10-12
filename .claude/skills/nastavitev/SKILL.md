@@ -152,6 +152,10 @@ Check: `env:check`. Restart `npm run dev` after changing `.env.local`.
 1. Open `https://vercel.com/new`; they sign up with GitHub and **Import** their repo (defaults are
    right). A first build may fail without keys — fine.
 2. They type `! npx vercel login`; you run `npx vercel link --yes --project <name>`.
+   `vercel link` appends `.env*` to `.gitignore` (that hides `.env.example`) and a
+   `VERCEL_OIDC_TOKEN` to `.env.local`: `git checkout -- .gitignore`; the token line may stay.
+   Existing Vercel variables marked Sensitive can't be read back (`env pull` shows
+   `[SENSITIVE]`); when in doubt, overwrite them with step 4.
 3. Find the real production address in Vercel → the project → **Settings → Domains** (Vercel adds a
    suffix like `-abc1` when the plain name is taken by someone else — don't guess it).
 4. Ask, then run `npm run vercel:env -- --site-url https://<that address>` (sends the keys without
