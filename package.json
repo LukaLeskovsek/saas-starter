@@ -8,6 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "db:run": "node --env-file-if-exists=.env.local scripts/db-run.mjs",
+    "db:list": "node scripts/db-list.mjs",
+    "env:check": "node scripts/env-check.mjs",
+    "vercel:env": "node --env-file-if-exists=.env.local scripts/vercel-env.mjs",
     "audit:security": "node scripts/audit-security.mjs"
   },
   "dependencies": {

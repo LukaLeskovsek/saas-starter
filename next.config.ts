@@ -1,7 +1,19 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
-const nextConfig: NextConfig = {};
+const nextConfig: NextConfig = {
+  // Dev only: tool output folders (browser logs, reports) change every second;
+  // watching them sends the dev server into an endless rebuild loop.
+  webpack: (config, { dev }) => {
+    if (dev) {
+      config.watchOptions = {
+        ...config.watchOptions,
+        ignored: ["**/node_modules/**", "**/.git/**", "**/.gstack/**", "**/.next/**"],
+      };
+    }
+    return config;
+  },
+};
 
 // Sentry build-time options. Source-map upload only runs when SENTRY_AUTH_TOKEN
 // is present (set automatically on Vercel after you connect Sentry); locally it

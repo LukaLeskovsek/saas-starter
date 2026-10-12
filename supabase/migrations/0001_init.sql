@@ -1,6 +1,6 @@
 -- 0001_init.sql
--- Run this once in your Supabase project: Dashboard → SQL Editor → paste → Run.
--- (Or via the Supabase CLI if you use it.)
+-- Claude applies it for you (Supabase MCP, or `npm run db:run -- supabase/migrations/0001_init.sql`).
+-- Safe to run again: every policy is dropped before it is recreated.
 --
 -- It creates two tables and turns on Row Level Security (RLS).
 --
@@ -21,10 +21,12 @@ create table if not exists public.profiles (
 alter table public.profiles enable row level security;
 
 -- A user can read and update only their own profile.
+drop policy if exists "profiles: self read" on public.profiles;
 create policy "profiles: self read"
   on public.profiles for select
   using (auth.uid() = id);
 
+drop policy if exists "profiles: self update" on public.profiles;
 create policy "profiles: self update"
   on public.profiles for update
   using (auth.uid() = id);
@@ -65,18 +67,22 @@ alter table public.requests enable row level security;
 
 -- Owner-only: every operation is scoped to the row's owner.
 -- User B literally cannot select, insert-for, update, or delete user A's rows.
+drop policy if exists "requests: owner select" on public.requests;
 create policy "requests: owner select"
   on public.requests for select
   using (auth.uid() = user_id);
 
+drop policy if exists "requests: owner insert" on public.requests;
 create policy "requests: owner insert"
   on public.requests for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "requests: owner update" on public.requests;
 create policy "requests: owner update"
   on public.requests for update
   using (auth.uid() = user_id);
 
+drop policy if exists "requests: owner delete" on public.requests;
 create policy "requests: owner delete"
   on public.requests for delete
   using (auth.uid() = user_id);
