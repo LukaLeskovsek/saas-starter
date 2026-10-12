@@ -6,10 +6,14 @@ računalniku traja okoli 30 minut, objava na internetu pa še 15.
 
 ## Kako začneš
 
-1. Odpri **Claude Code** v mapi, kamor želiš aplikacijo (na primer `Dokumenti/moja-aplikacija`).
+1. Odpri **Claude Code** v mapi, v kateri naj nastane mapa aplikacije (na primer `Dokumenti`).
 2. Če aplikacije še nimaš, napiši:
    > Ustvari mi zasebno kopijo predloge LukaLeskovsek/saas-starter in jo odpri.
-3. Ko si v mapi aplikacije, napiši:
+
+   Claude ustvari mapo aplikacije in ti pove njeno ime.
+3. Zapri Claude Code (`/exit`) in ga odpri v mapi aplikacije: napiši `cd <ime-mape>` in nato
+   `claude`. Šele tako Claude vidi navodila in ukaze te aplikacije.
+4. Napiši:
    > Nastavi mi aplikacijo.
 
 Claude najprej preveri, kaj je že narejeno, in začne pri prvem koraku, ki manjka. Če prekineš, se
