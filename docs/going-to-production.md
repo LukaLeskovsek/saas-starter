@@ -1,7 +1,7 @@
 # Going to production
 
-The full pipeline walkthrough is the workshop guide **`nextjs-vercel-github-pipeline.md`**
-(in your install package). This page only adds the repo-specific notes.
+The first publish is a step in `/nastavitev` (human version: [nastavitev.md](nastavitev.md),
+step 9). This page adds what comes after.
 
 ## Production = your `main` branch
 
@@ -26,8 +26,18 @@ into `main` (a local merge — no pull request while you're solo; see `workflow-
 ## Environment variables
 
 The variables in `.env.local` must also be set in **Vercel → Project → Settings →
-Environment Variables**. If the live site behaves differently from local, a missing
-or different env var is the first thing to check. The list is in `.env.example`.
+Environment Variables**. `npm run vercel:env -- --site-url https://<live address>` copies
+them without printing a value (`--dry-run` lists the names first). If the live site
+behaves differently from local, a missing or different env var is the first thing to
+check. The list is in `.env.example`.
+
+## Your live address
+
+Vercel → Project → Settings → **Domains** shows it. When the plain
+`<project>.vercel.app` name is taken by someone else, Vercel adds a suffix
+(`<project>-abc1.vercel.app`); the address without the suffix is then someone else's
+site. Add the live address to Supabase → Authentication → **URL Configuration** (Site URL
+and Redirect URLs), or password reset links won't work there.
 
 ## Custom domain
 

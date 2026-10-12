@@ -1,29 +1,55 @@
 # CLAUDE.md — rules for working in this repo
 
-This is a SaaS starter app for the SPS AI Accelerator. A founder rebrands it,
+This is the SaaS starter for Day 2 of the Tovarna podjemov workshop. A founder rebrands it,
 adds one feature, and ships it. Everything security-critical is already wired to
 managed services. Your job is to help with **identity, content, and one feature** —
-never plumbing.
+never plumbing. The founder is not a programmer and speaks Slovenian: answer in Slovenian,
+and keep everything they see in the app in Slovenian.
 
 ## First, read the founder's context
 
-Before any branding or copy work, read these files if they exist in the project:
-`PERSON.md`, `COMPANY.md`, `BRAND.md`. Write in that brand voice. If they are
-missing, ask for them rather than inventing a voice.
+Before any branding or copy work, read the profile at the confirmed location in
+`.claude/profile-location.local.md` (gitignored; `/nastavitev` writes it): PERSON.md and
+INDEX.md, then the selected company's COMPANY.md, BRAND.md and PRIMERI.md. If the pointer is
+missing, use root-level `PERSON.md` / `COMPANY.md` / `BRAND.md` if they exist; otherwise ask
+rather than inventing a voice. Never copy the whole profile into the repo.
+
+## You pick the skill — the founder never has to remember one
+
+The founder talks normally ("nastavi mi aplikacijo", "prilagodi stran", "to ne dela", "daj v živo").
+**You** choose the skill from `.claude/skills/`, say in one line which one and why, and run it.
+Slash commands still work, but never ask the founder to type one.
+
+| When the founder… | Run |
+|---|---|
+| is setting up the app, a new computer, keys or the first publish ("nastavi mi aplikacijo") | `/nastavitev` |
+| describes an idea, a feature or a change in behaviour (also a rebrand of the landing page) | `/plan` (always first — no code before the plan exists) |
+| agrees to the plan ("ja", "naredi", "gremo") or asks for the next step | `/build` |
+| wants AI to read, draft, sort, summarise or answer | `/integrate-ai` |
+| asks "ali dela?", "preveri", or a slice was just built | `/verify` |
+| reports an error, pastes one, or says something is broken / slow | `/debug` |
+| wants it live, deployed, shared | `/ship` (only after a passing `/verify`) |
+
+Ask before anything that leaves the machine (push, deploy, a write to an external system).
 
 ## Where things live
 
 - `app/(marketing)/page.tsx` — the landing page. **This is the main rebrand target.**
-- `app/globals.css` — brand colours (CSS variables at the top). Change colour here, not in components.
+- `config/brand.ts` — the product name, tagline and footer line.
+- `app/globals.css` — brand colours (`--brand`, `--neutral-hue`, `--radius` at the top). Change colour here, not in components.
+- `app/layout.tsx` — the font (`next/font`, keep the `latin-ext` subset for č, š, ž).
 - `app/(app)/feature/` — the worked example "requests" feature, an **AI feature**: form → table → **LLM call** (triage + draft reply) → list. **Imitate this shape** for the founder's own AI feature.
 - `lib/ai.ts` — the **server-only** LLM helper (OpenRouter via the OpenAI SDK, default Claude, mock-mode when no key). All AI calls go through `generate()`. Never call it from a client component.
 - `app/(app)/dashboard/` — the signed-in shell.
 - `supabase/migrations/` — database schema + Row Level Security (RLS) policies.
-- `lib/`, `app/login/` — auth, Supabase clients, email. Pre-built.
+- `lib/`, `app/login/`, `app/auth/`, `app/forgot-password/`, `app/(app)/setup-password/` — auth (incl. forgotten password), Supabase clients, email. Pre-built.
+- `components/ui/` (shadcn on Base UI) and `components/app/` (PageHeader, EmptyState, AuthShell, UserMenu, ActionForm, Field …) — shared building blocks; reuse them.
+- `lib/i18n/sl.ts` — shared Slovenian copy; `lib/format.ts` — dates, money and plurals in Slovenian (never show a raw ISO date or `toFixed()` number).
 
 ## Never modify
 
-- `app/login/` — the sign-in / sign-up flow. It works; leave it.
+- `app/login/`, `app/auth/`, `app/forgot-password/`, `app/(app)/setup-password/` — the sign-in,
+  sign-up and password-reset flow. It works; leave it.
 - `lib/supabase/` — the Supabase clients and session handling.
 - `instrumentation*.ts`, `sentry.*.config.ts`, `next.config.ts` — Sentry wiring.
 - Any migration that has already been run on the database.
@@ -47,7 +73,11 @@ missing, ask for them rather than inventing a voice.
   RLS-scoped table, the same as any other data. Use `/integrate-ai` to add one.
 - **Prefer editing the worked example** over inventing new structure. New feature =
   copy the `requests` shape (a table with `user_id`, RLS, a form, a list).
-- **After any change**, run `npm run lint && npm run build` before saying you're done.
+- **Slovenian copy.** Shared words come from `lib/i18n/sl.ts`, a page's own words can live next
+  to it; dates and money go through `lib/format.ts`. No developer words in the UI (no env-var
+  names, table names, "RLS", "mock"): say "Demo podatki" instead.
+- **After any change**, run `npx tsc --noEmit && npm run lint` (and `npm run build` only when
+  `npm run dev` is not running — both write `.next`) before saying you're done.
 - **Undo via `git revert`, never `git reset --hard` or `git push --force`.** If a change
   broke a working state, revert to the last good commit (a new commit that restores it)
   and re-verify from there. The commit history is the founder's safety net — keep it intact.
@@ -69,8 +99,12 @@ To turn pull requests ON (a teammate joins, or you want review before deploy), c
 
 ## Design system (shadcn/ui)
 
-The UI is shadcn/ui (Base UI + Tailwind v4) in a premium-neutral style. Rebrand via the
-tokens at the top of `app/globals.css` (`--primary`, `--radius`) — not component files.
+The UI is shadcn/ui (Base UI + Tailwind v4) in a warm, friendly style shared with internal-os.
+Rebrand via the tokens at the top of `app/globals.css` (`--brand`, `--neutral-hue`, `--radius`),
+the font in `app/layout.tsx` and the words in `config/brand.ts` — not component files. Use
+tokens only (`bg-primary`, `text-muted-foreground`, `bg-accent`, `bg-success/12` …), never hex
+values or Tailwind palette colours. Compose links with `render={<Link href="…" />}`, never
+`asChild`. Light and dark mode both work; check both.
 **Every Server Action form submits with `<SubmitButton>`** (`components/ui/submit-button.tsx`),
 which shows a spinner and disables while pending (no double-submit). Action results surface
 as toasts via `?ok=` / `?error=`. Signed-in pages live under `app/(app)/` so they inherit

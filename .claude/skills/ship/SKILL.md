@@ -1,6 +1,6 @@
 ---
 name: ship
-description: Close the loop — get the verified change live and confirm it actually works in production. Use when the user says "/ship", "deploy", "push it live", or after a passing /verify.
+description: Close the loop — get the verified change live and confirm it actually works in production. Use when the user says "/ship", "deploy", "push it live", or after a passing /verify. Also in Slovenian: "daj v živo", "objavi", "deploy", "pokaži strankam".
 ---
 
 When invoked, get the change to a working public URL — and **confirm** it, don't assume it.
@@ -10,7 +10,10 @@ When invoked, get the change to a working public URL — and **confirm** it, don
 2. Check **Workflow mode** in `CLAUDE.md` — *Pull requests: OFF* (default) or *ON*.
 3. **PRs OFF (default):** commit + push to `main` → Vercel deploys `main` to production (~1 min). For a risky change, do it on a short-lived **branch** first (push → Vercel mints a **preview URL** → check there), then **merge it into `main` locally** (`git checkout main && git merge <branch> && git push`). **Do not open a pull request.**
    **PRs ON:** open a pull request with `gh pr create`, summarize the diff, use the branch's **preview URL** for review, and merge when checks pass. See `docs/workflow-mode.md`.
-4. **Confirm the LIVE url:** open the production URL and check it loads (not a login/401 page), sign-in works, and the feature works.
+4. **Confirm the LIVE url:** open the production URL and check it loads (not a login/401 page), sign-in works, and the feature works — once on a phone-sized screen. The real address is in Vercel → Settings → **Domains**: when the plain `<project>.vercel.app` is taken, Vercel adds a suffix and the plain name is someone else's site.
+   **New migrations:** local and live share one Supabase project, so a migration applied during `/build` is already live — confirm with its probe (`npm run db:list -- --json`, then `select to_regclass('<probe>')`).
+   **New keys:** a key added to `.env.local` must also be on Vercel — `npm run vercel:env -- --site-url <live url>` (ask first; it sends keys) and redeploy.
+   **AI on production:** `AI_BACKEND` must be `openrouter` with `OPENROUTER_API_KEY` set on Vercel — `local-claude` only works on your own machine.
 5. **Public check:** if the URL shows a Vercel login / "Authenticate" page, Deployment Protection is on → *Vercel → Settings → Deployment Protection → turn off **Vercel Authentication*** so your pair can open it.
 6. Report the live URL.
 7. **Record the release.** Append `docs/features/<slug>/runs/<YYYY-MM-DD-HHMM>-ship.md` (live URL, commit ref — format in `docs/features/README.md`) and set the Card's `status: shipped` and `live_url`.

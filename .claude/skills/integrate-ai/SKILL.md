@@ -1,6 +1,6 @@
 ---
 name: integrate-ai
-description: Add an AI feature — a server-side LLM call via lib/ai.ts. Use when the user says "/integrate-ai", "add AI", "make it summarize/draft/classify/answer", or wants an LLM in their app. Models on the requests feature.
+description: Add an AI feature — a server-side LLM call via lib/ai.ts. Use when the user says "/integrate-ai", "add AI", "make it summarize/draft/classify/answer", or wants an LLM in their app. Models on the requests feature. Also in Slovenian: "dodaj AI", "naj povzame", "naj napiše osnutek", "naj razvrsti", "naj odgovori".
 ---
 
 When invoked, add one AI capability the smallest useful way, server-side, and store the result like any other data. The worked example (`app/(app)/feature/`) already does this — imitate it.
@@ -12,7 +12,7 @@ When invoked, add one AI capability the smallest useful way, server-side, and st
 ## The pattern (imitate the requests feature)
 1. **Build the prompt** from the input. A clear `system` line (role + length limit) + a `prompt` with the data.
 2. **Call `generate({ system, prompt })`** from `lib/ai.ts` — inside a Server Action or route handler, **never** a client component.
-3. **Store the result** in an RLS-scoped column/table (new table → RLS in the same migration; `npm run db:run`).
+3. **Store the result** in an RLS-scoped column/table (new table → RLS in the same migration; apply it through the Supabase MCP, or `npm run db:run`).
 4. **Render it.** Wrap the call in try/catch so a failure never loses the row.
 5. **Record the prompt.** Write the capability and the **exact `system` + input** you used into the **AI** section of `docs/features/<slug>/feature.md` (format in `docs/features/README.md`), and append a `runs/<YYYY-MM-DD-HHMM>-integrate-ai.md` evidence file. The prompt living in the Card means the founder can read and tweak the behaviour, then re-run this skill.
 

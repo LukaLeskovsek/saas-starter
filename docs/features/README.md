@@ -10,7 +10,6 @@ Why bother:
 - **History / evidence.** It's in git, so you can see what each feature was
   supposed to do and that it was actually verified — not just "it should work."
 - **Easy to review and modify.** It's a Markdown file. Open it, read it, change it.
-  (`/zbi:visual-doc docs/features/<slug>/feature.md` for a WYSIWYG view.)
 - **The Card is the source of truth.** `/plan` writes it; `/build` reads it. Edit
   the Card and re-run a skill — the work follows the doc, not the other way round.
 

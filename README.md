@@ -1,88 +1,112 @@
 # SaaS Starter
 
-A starter app you make your own: a branded landing page, working sign-in, and one
-feature — live on the internet by lunch. Everything security-critical (sign-in,
-email, error tracking) is pre-wired to managed services, so you focus on your
-product, not the plumbing.
+Začetna aplikacija, ki jo narediš za svojo: predstavitvena stran v tvojem imenu, delujoča prijava in ena funkcija, do kosila na internetu. Vse, kar je pomembno za varnost (prijava, e-pošta, spremljanje napak), je že povezano z zunanjimi storitvami, zato se ukvarjaš s svojim izdelkom.
 
-**Stack:** Next.js 15 · Supabase (auth + database) · Resend (email) · Sentry
-(errors) · Vercel (hosting). You bring your own free account for each.
+Ni ti treba biti programer. Odpri Claude Code v mapi aplikacije in napiši **»Nastavi mi aplikacijo«**. Claude te vodi korak za korakom, navodila za ljudi pa so v [docs/nastavitev.md](docs/nastavitev.md). Ukazov, ki se začnejo s poševnico (`/nastavitev`, `/plan` …), ti ni treba tipkati: Claude jih izbere sam, ko poveš, kaj želiš.
+
+Uporabljaš svoje brezplačne račune GitHub, Supabase in Vercel. AI, e-pošto in spremljanje napak dodaš, ko jih potrebuješ.
+
+## Kaj dobiš
+
+| Del | Kaj pokaže |
+|---|---|
+| **Domača stran** (`app/(marketing)/page.tsx`) | Predstavitvena stran, ki jo prilagodiš svojemu podjetju. Ime in stavek sta v `config/brand.ts`, barve v `app/globals.css`. |
+| **Prijava** (`/login`) | Registracija in prijava z e-pošto in geslom, pozabljeno geslo in nastavitev novega gesla. |
+| **Nadzorna plošča** (`/dashboard`) | Stran po prijavi, z gumbom za testno napako v Sentryju. |
+| **Zahtevki** (`/feature`) | Primer funkcije z AI: obrazec zapiše zahtevek v tabelo, AI ga razvrsti in predlaga odgovor, seznam pokaže samo tvoje zahtevke. Po tem vzoru zgradiš svojo funkcijo. |
+
+Vsaka tabela ima RLS: pravila v bazi, ki vsakemu uporabniku pokažejo samo njegove podatke.
+
+## Kaj narediš naprej
+
+1. **Prilagodi stran.** Reci Claudu »prilagodi domačo stran mojemu podjetju«. Uporabi tvoj profil (PERSON.md, COMPANY.md, BRAND.md), če ga imaš.
+2. **Zgradi svojo funkcijo.** Povej, kaj potrebuješ. Claude najprej naredi kratek plan, nato zahtevke zamenja s tvojo funkcijo in ohrani njihovo obliko (obrazec, tabela, seznam).
+3. **Objavi.** Reci »daj v živo«. Claude preveri, da vse deluje, in objavi na Vercelu.
 
 ---
 
-## 6 steps to a live URL
+## Podrobnosti za delo v terminalu
 
-You can ask Claude Code to do each step with you — that's the point.
+`/nastavitev` vse to naredi s teboj. Spodaj so isti koraki za tiste, ki raje delajo v terminalu.
 
-### 1. Get the code — your own repo
-On GitHub, click **"Use this template" → Create a new repository** and set it
-**Private** (so you get your own copy to push to — it holds your app *and its
-history*), then:
+Aplikacija teče na Next.js 15, Supabase (prijava in baza z RLS), Resend (e-pošta), Sentry (napake) in Vercel (gostovanje).
+
+### 1. Koda v tvojem repozitoriju
+
+Na GitHubu klikni **»Use this template« → Create a new repository** in ga nastavi kot **Private**. To je tvoja kopija, kamor pošiljaš spremembe, in hrani tvojo aplikacijo *ter njeno zgodovino*. Nato:
+
 ```bash
 git clone https://github.com/<your-username>/saas-starter.git
 cd saas-starter
-npm install
+npm ci
 ```
-Template source: https://github.com/LukaLeskovsek/saas-starter
-New to git? Three safe verbs and one rule: [docs/git-basics.md](docs/git-basics.md).
 
-### 2. Create your Supabase project
-- supabase.com → **New project** (pick the EU region; remember the database password).
-- **Turn off email confirmation:** Authentication → Sign In / Providers → Email →
-  toggle **"Confirm email" OFF**. (Sign-in then works instantly, no email needed.)
-- Copy your **Project URL** + **anon key** (Settings → API). Claude sets up the
-  database for you in the next step — no SQL pasting.
+Ali z enim ukazom: `gh repo create <name> --template LukaLeskovsek/saas-starter --private --clone`.
+Izvor predloge: https://github.com/LukaLeskovsek/saas-starter
+Git ti je nov? Trije varni ukazi in eno pravilo: [docs/git-basics.md](docs/git-basics.md).
 
-### 3. Fill in your keys, then let Claude set up the database
+### 2. Projekt Supabase
+
+- Na supabase.com izberi **New project** (regija v EU, geslo baze shrani v upravljalnik gesel). Vsaka aplikacija potrebuje svoj projekt.
+- V **Authentication → Sign In / Providers → Email** izklopi **Confirm email**. Prijava potem deluje takoj, brez e-pošte. Če ostane vklopljen, aplikacija po registraciji prosi za potrditev po e-pošti.
+- V **Authentication → URL Configuration** nastavi Site URL `http://localhost:3000` in Redirect URLs `http://localhost:3000/**`. Živi naslov dodaš kasneje.
+- S tem projektom poveži **Supabase MCP**, da Claude prebere naslov in javni ključ ter požene migracije (prijava OAuth, brez dostopnega žetona):
+  `claude mcp add --transport http --scope local supabase "https://mcp.supabase.com/mcp?project_ref=<ref>&features=database,development,docs,debugging"`,
+  nato `/mcp` → supabase → Authenticate.
+
+### 3. Ključi in baza
+
 ```bash
 cp .env.example .env.local
 ```
-Open `.env.local` and fill in your Supabase URL + anon key, plus a **Supabase
-access token** (supabase.com → Account → Access Tokens) so Claude can run your
-database setup. Add your Resend key and Sentry DSN when ready — Claude Code can
-walk you through it one line at a time.
 
-Then ask Claude: **"run the database migration."** It applies the schema for you:
+Izpolni Supabase URL in javni (anon) ključ. Skrivnega ključa Supabase ta aplikacija ne potrebuje. `npm run env:check` pokaže, kateri ključi so izpolnjeni in pravilne oblike, ne da bi jih izpisal. `OPENROUTER_API_KEY`, `RESEND_API_KEY` in `NEXT_PUBLIC_SENTRY_DSN` lahko ostanejo prazni: AI potem vrača demo odgovore, e-pošta se ne pošlje.
+
+Nato Claudu reci **»pripravi bazo«**. Seznam migracij po vrsti dobiš z ukazom:
+
 ```bash
-npm run db:run -- supabase/migrations/0001_init.sql
-npm run db:run -- supabase/migrations/0002_ai.sql
-npm run db:run -- supabase/migrations/0003_ai_usage.sql
+npm run db:list          # 0001_init, 0002_ai, 0003_ai_usage
 ```
-*(No access token? The command tells you to paste the file into Supabase → SQL Editor instead.)*
 
-### 4. Run it locally
+Claude prek Supabase MCP (`apply_migration`) požene vsako datoteko, ki še ni bila pognana, pred tem pa za vsako preveri njeno kontrolno tabelo. Brez MCP isto naredi `npm run db:run -- <file>` z `SUPABASE_ACCESS_TOKEN` (supabase.com → Account → Access Tokens).
+
+### 4. Zagon
+
 ```bash
 npm run dev
 ```
-Open http://localhost:3000 — the landing page loads. Visit `/login`, create an
-account, and you land on your dashboard.
 
-### 5. Make it yours
-Ask Claude Code (it reads `PERSON.md` / `COMPANY.md` / `BRAND.md`):
-> "Rebrand the landing page in our voice and colours. Don't touch the login flow or `lib/`."
+Odpri http://localhost:3000. Klikni **Začni**, ustvari račun in prideš na nadzorno ploščo.
 
-Then replace the worked **requests** feature with your own, keeping its shape
-(form → table → list). See `CLAUDE.md` for the rails.
+### 5. Prilagoditev
 
-### 6. Put it on the internet
-- Push to GitHub.
-- vercel.com → **Add New Project** → import your repo.
-- Paste the same variables from `.env.local` into Vercel's environment settings.
-- Deploy. Your live URL is ready. Every later `git push` redeploys automatically.
+Ime in stavek v `config/brand.ts`, barve (`--brand`, `--neutral-hue`, `--radius`) na vrhu `app/globals.css`, pisava v `app/layout.tsx`. Prijave in `lib/` ne spreminjaj. Pravila za Clauda so v `CLAUDE.md`.
 
-More on domains, preview deployments, and staging: see [docs/going-to-production.md](docs/going-to-production.md).
+### 6. Objava na Vercelu
 
----
+Uvozi repozitorij na vercel.com/new, nato:
 
-## Scripts
-- `npm install` — install dependencies
-- `npm run dev` — local dev server
-- `npm run build` — production build (also type-checks)
-- `npm run lint` — lint
-- `npm start` — run the production build locally
-- `npm run audit:security` — fail on high/critical npm advisories
+```bash
+npx vercel login && npx vercel link
+npm run vercel:env -- --site-url https://<project>.vercel.app   # --dry-run najprej izpiše seznam ključev
+```
 
-## Notes
-- A Supabase "Edge Runtime / `process.version`" warning on build is expected and harmless.
-- Secrets live in `.env.local` and in Vercel — never in code, never in chat.
-- Security notes: [docs/security.md](docs/security.md).
+Pravi živi naslov preveri v Vercel → **Settings → Domains**. Ko je ime že zasedeno, Vercel doda pripono, naslov brez nje pa ni tvoj. Ponovno objavi (Redeploy), živi naslov dodaj v Supabase **URL Configuration** in izklopi **Vercel Authentication** (Settings → Deployment Protection), če živa stran zahteva prijavo v Vercel. Od takrat vsak push na `main` objavi novo različico.
+
+Več o domenah in predogledih: [docs/going-to-production.md](docs/going-to-production.md).
+
+## Skripte
+
+- `npm run dev` · `npm run build` · `npm run lint` · `npm start`
+- `npm run env:check` pokaže, kateri ključi v `.env.local` so izpolnjeni in pravilne oblike (vrednosti nikoli ne izpiše).
+- `npm run db:list` izpiše migracije po vrsti in kako preveriš, ali je bila posamezna pognana (`-- --json` za Clauda).
+- `npm run db:run -- <file>` požene eno migracijo z `SUPABASE_ACCESS_TOKEN` (če ne uporabljaš Supabase MCP).
+- `npm run vercel:env -- --site-url <url>` kopira potrebne ključe na Vercel, ne da bi jih izpisal.
+- `npm run audit:security` javi napako ob visokih ali kritičnih opozorilih npm.
+
+## Opombe
+
+- Opozorilo Supabase »Edge Runtime / `process.version`« pri gradnji je pričakovano in neškodljivo.
+- Skrivnosti so v `.env.local` in na Vercelu, nikoli v kodi ali v klepetu.
+- Varnost: [docs/security.md](docs/security.md). Pozabljeno geslo: [docs/password-recovery.md](docs/password-recovery.md).
+- Na 3. dan isti temelji dobijo module: [internal-os-starter](https://github.com/LukaLeskovsek/internal-os-starter).

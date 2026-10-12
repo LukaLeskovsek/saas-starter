@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Prove the change actually works — run it and exercise the feature. Use when the user says "/verify", "does it work", "test it", or after /build. Reports concrete pass/fail.
+description: Prove the change actually works — run it and exercise the feature. Use when the user says "/verify", "does it work", "test it", or after /build. Reports concrete pass/fail. Also in Slovenian: "ali dela?", "preveri", "testiraj".
 ---
 
 When invoked, don't *say* it works — *show* it. Run the app, walk the real flow, and report what you actually observed.

@@ -1,6 +1,6 @@
 ---
 name: build
-description: Execute one slice of the plan — make the change, keep it green, commit. Use when the user says "/build", "build it", "do the next slice", or after /plan. One slice at a time.
+description: Execute one slice of the plan — make the change, keep it green, commit. Use when the user says "/build", "build it", "do the next slice", or after /plan. One slice at a time. Also in Slovenian: "naredi", "gremo", "zgradi", "naslednji korak", "ja, tako".
 ---
 
 When invoked, implement **one** slice (the next one from `/plan`) inside the repo's rails — not the whole plan.
@@ -18,7 +18,7 @@ get a "yes", then build.
 ## Steps
 1. State the one slice you're doing (one sentence).
 2. Make the change. Imitate the `requests` feature for anything new (form → RLS table → list).
-3. New table? Add it with **RLS policies in the same migration** (owner-scoped). Never an unprotected table. **Then run that migration** — `npm run db:run -- supabase/migrations/<file>.sql` — and confirm the table exists. The feature silently fails until it's applied. *(No token set? The command falls back to telling the user to paste it in Supabase.)*
+3. New table? Add it with **RLS policies in the same migration** (owner-scoped). Never an unprotected table. **Then run that migration** — apply it through the **Supabase MCP** (`apply_migration`, name = file name without `.sql`, query = the file) when it is connected; otherwise `npm run db:run -- supabase/migrations/<file>.sql` (needs `SUPABASE_ACCESS_TOKEN`) — and confirm the table exists (`select to_regclass('public.<table>')`). The feature silently fails until it's applied. *(Neither available? `/nastavitev` connects the Supabase MCP.)*
 4. Run `npm run lint && npm run build`. If it's red, fix it before going further.
 5. Show the user the diff in plain language — what changed, and why.
 6. Commit with a clear message.

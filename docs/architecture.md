@@ -29,8 +29,14 @@ choice. Building your own login or email sending is the big no-no.
 
 - `app/(marketing)/page.tsx` — the landing page (your main rebrand target).
 - `app/login/` — sign-in / sign-up (password). Pre-built; don't touch.
+- `app/forgot-password/`, `app/auth/callback/`, `app/auth/recovery/`, `app/(app)/setup-password/` —
+  forgotten password and the e-mail confirmation link (see `docs/password-recovery.md`). Pre-built.
 - `app/(app)/` — everything behind sign-in: `dashboard/` and the `feature/` example.
-- `app/globals.css` — brand colours as CSS variables.
+- `app/globals.css` — brand colours as CSS variables (`--brand`, `--neutral-hue`, `--radius`).
+- `config/brand.ts` — the product name, tagline and footer line.
+- `components/ui/` (shadcn on Base UI) and `components/app/` (page header, empty state,
+  sign-in frame, account menu …) — shared building blocks. Reuse them.
+- `lib/i18n/sl.ts` — shared Slovenian copy; `lib/format.ts` — dates and money in Slovenian.
 - `lib/supabase/` — Supabase clients + session handling. Pre-built.
 - `lib/email.ts` — the Resend wrapper.
 - `supabase/migrations/` — database tables + Row Level Security.
