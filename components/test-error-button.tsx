@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 // FACILITATOR / DEMO ONLY — delete this before going to real customers.
 // Day 2 "production basics": click it to throw a deliberate error and watch it
 // appear in your Sentry project, with a readable stack trace.
-export function TestErrorButton() {
+export function TestErrorButton({ label }: { label: string }) {
   return (
     <Button
       variant="secondary"
@@ -13,7 +13,7 @@ export function TestErrorButton() {
         throw new Error("Sentry test error — thrown from the dashboard");
       }}
     >
-      Trigger a test error
+      {label}
     </Button>
   );
 }

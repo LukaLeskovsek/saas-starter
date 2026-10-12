@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
+import { Inbox } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -7,45 +8,42 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { PageHeader } from "@/components/app/page-header";
 import { TestErrorButton } from "@/components/test-error-button";
+import { sl } from "@/lib/i18n/sl";
+
+export const metadata = { title: sl.dashboard.title };
 
 export default function DashboardPage() {
+  const t = sl.dashboard;
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          You&rsquo;re signed in. This is your app shell — make it yours.
-        </p>
+    <div>
+      <PageHeader title={t.title} description={t.text} />
+
+      <div className="grid gap-5 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Inbox className="size-4 text-primary" />
+              {t.requestsTitle}
+            </CardTitle>
+            <CardDescription>{t.requestsText}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button render={<Link href="/feature" />}>{t.requestsOpen}</Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>{t.sentryTitle}</CardTitle>
+            <CardDescription>{t.sentryText}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <TestErrorButton label={t.sentryButton} />
+          </CardContent>
+        </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Requests</CardTitle>
-          <CardDescription>
-            The worked example feature (form → table → list). Open it, learn the
-            shape, then replace it with your own.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Link href="/feature" className={buttonVariants()}>
-            Open requests
-          </Link>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Production basics (demo)</CardTitle>
-          <CardDescription>
-            Throw a deliberate error and watch it land in your Sentry project.
-            Delete this card before real customers.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <TestErrorButton />
-        </CardContent>
-      </Card>
     </div>
   );
 }

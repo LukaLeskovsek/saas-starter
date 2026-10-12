@@ -1,24 +1,33 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Figtree } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/app/theme-provider";
+import { brand } from "@/config/brand";
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
+// Rebrand the font here. latin-ext keeps č, š, ž crisp.
+const font = Figtree({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-sans",
+  display: "swap",
+});
 
-// Rebrand: change the title/description to your product (or ask Claude from COMPANY.md).
+// Rebrand: name and tagline live in config/brand.ts.
 export const metadata: Metadata = {
-  title: "SaaS Starter",
-  description: "A starter app you make your own.",
+  title: { default: brand.name, template: `%s · ${brand.name}` },
+  description: brand.tagline,
 };
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={geist.variable}>
+    <html lang="sl" className={font.variable} suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans text-foreground antialiased">
-        {children}
-        <Toaster richColors position="top-center" />
+        <ThemeProvider>
+          {children}
+          <Toaster position="bottom-center" closeButton />
+        </ThemeProvider>
       </body>
     </html>
   );

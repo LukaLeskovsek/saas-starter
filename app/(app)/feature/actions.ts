@@ -10,11 +10,14 @@ import { createClient } from "@/lib/supabase/server";
 import { sendRequestConfirmation } from "@/lib/email";
 import { generate } from "@/lib/ai";
 import { AiDailyLimitError, recordAiUsage } from "@/lib/ai-budget";
+import { sl } from "@/lib/i18n/sl";
+
+const t = sl.requests;
 
 const RequestSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  message: z.string().min(1, "Message is required"),
-  amount: z.coerce.number().nonnegative().optional(),
+  name: z.string().trim().min(1, t.errName).max(200, t.errName),
+  message: z.string().trim().min(1, t.errMessage).max(4000, t.errMessage),
+  amount: z.coerce.number(t.errAmount).nonnegative(t.errAmount).optional(),
 });
 
 export async function createRequest(formData: FormData) {
@@ -25,7 +28,7 @@ export async function createRequest(formData: FormData) {
   });
 
   if (!parsed.success) {
-    const msg = parsed.error.issues[0]?.message ?? "Invalid input";
+    const msg = parsed.error.issues[0]?.message ?? sl.errors.generic;
     redirect(`/feature?error=${encodeURIComponent(msg)}`);
   }
 
@@ -46,7 +49,9 @@ export async function createRequest(formData: FormData) {
     .select("id")
     .single();
   if (error) {
-    redirect(`/feature?error=${encodeURIComponent(error.message)}`);
+    // The technical reason goes to the server log (and Sentry), not to the person.
+    console.error("request insert failed", error);
+    redirect(`/feature?error=${encodeURIComponent(t.errSave)}`);
   }
 
   // The AI step (lib/ai.ts → OpenRouter → Claude), server-side. One call: triage
@@ -57,13 +62,13 @@ export async function createRequest(formData: FormData) {
     await recordAiUsage(supabase, "requests");
     const { text } = await generate({
       system:
-        "You are a concise, friendly support assistant. Keep replies to 2–3 sentences.",
-      prompt: `A user submitted a request.\nName: ${parsed.data.name}\nMessage: ${parsed.data.message}\n\nRespond with:\n1) One-line triage: category + urgency.\n2) A short suggested reply.`,
+        "Si jedrnat in prijazen pomočnik za podporo strankam. Odgovarjaj v slovenščini, v 2–3 stavkih.",
+      prompt: `Stranka je poslala zahtevek.\nIme: ${parsed.data.name}\nSporočilo: ${parsed.data.message}\n\nOdgovori z:\n1) Razvrstitev v eni vrstici: kategorija in nujnost.\n2) Kratek predlog odgovora.`,
     });
     await supabase.from("requests").update({ ai_draft: text }).eq("id", inserted!.id);
   } catch (e) {
     if (e instanceof AiDailyLimitError) {
-      redirect("/feature?error=Daily+AI+limit+reached.+Try+again+tomorrow.");
+      redirect(`/feature?error=${encodeURIComponent(sl.errors.aiLimit)}`);
     }
     console.error("AI draft failed", e);
   }
@@ -77,5 +82,5 @@ export async function createRequest(formData: FormData) {
   }
 
   revalidatePath("/feature");
-  redirect("/feature?ok=1");
+  redirect(`/feature?ok=${encodeURIComponent(t.saved)}`);
 }

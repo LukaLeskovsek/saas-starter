@@ -23,8 +23,8 @@ export async function sendRequestConfirmation(params: {
   const { data, error } = await resend.emails.send({
     from,
     to: params.to,
-    subject: "We received your request",
-    text: `Hi ${params.name}, thanks — we got your request and will be in touch.`,
+    subject: "Prejeli smo tvoj zahtevek",
+    text: `Pozdravljen/a ${params.name}, hvala. Tvoj zahtevek smo prejeli in se ti kmalu oglasimo.`,
   });
 
   if (error) {

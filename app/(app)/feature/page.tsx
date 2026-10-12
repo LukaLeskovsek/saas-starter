@@ -1,19 +1,23 @@
+import { Inbox, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { createRequest } from "./actions";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/app/page-header";
+import { EmptyState } from "@/components/app/empty-state";
+import { formatMoney, formatRelative } from "@/lib/format";
+import { sl } from "@/lib/i18n/sl";
+
+export const metadata = { title: sl.requests.title };
 
 // The worked example feature: form → table → AI call → list, scoped per-user by
 // RLS. The AI triages each request and drafts a reply (lib/ai.ts → OpenRouter).
 // REPLACE THIS with your own AI feature, keeping the same shape.
 export default async function FeaturePage() {
+  const t = sl.requests;
   const supabase = await createClient();
   // RLS guarantees this only ever returns the signed-in user's own rows.
   const { data: requests } = await supabase
@@ -24,69 +28,59 @@ export default async function FeaturePage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Requests</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          The form writes to a table (owner-only via RLS); AI triages each request and
-          drafts a reply; the list shows only your rows.
-        </p>
-      </div>
+      <PageHeader title={t.title} description={t.text} className="mb-0" />
 
       <Card>
         <CardHeader>
-          <CardTitle>New request</CardTitle>
+          <CardTitle>{t.newTitle}</CardTitle>
         </CardHeader>
         <CardContent>
-          <form action={createRequest} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" name="name" required />
+          <form action={createRequest} className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="name">{t.name}</Label>
+              <Input id="name" name="name" required maxLength={200} />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="message">Message</Label>
-              <textarea
-                id="message"
-                name="message"
-                required
-                rows={3}
-                className="flex w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-              />
+            <div className="space-y-2">
+              <Label htmlFor="message">{t.message}</Label>
+              <Textarea id="message" name="message" required rows={3} maxLength={4000} />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="amount">Amount (optional)</Label>
-              <Input id="amount" name="amount" type="number" step="0.01" min="0" />
+            <div className="space-y-2">
+              <Label htmlFor="amount">
+                {t.amount} <span className="font-normal text-muted-foreground">({sl.common.optional})</span>
+              </Label>
+              <Input id="amount" name="amount" type="number" inputMode="decimal" step="0.01" min="0" className="max-w-48" />
             </div>
-            <SubmitButton pendingText="Submitting…">Submit request</SubmitButton>
+            <SubmitButton size="lg" pendingText={t.submitting}>
+              {t.submit}
+            </SubmitButton>
           </form>
         </CardContent>
       </Card>
 
-      <div className="space-y-3">
-        <h2 className="text-sm font-medium text-muted-foreground">Your requests</h2>
+      <section className="space-y-3">
+        <h2 className="px-1 text-sm font-semibold text-muted-foreground">{t.listTitle}</h2>
         {rows.length > 0 ? (
           <div className="space-y-3">
             {rows.map((r) => (
               <Card key={r.id} size="sm">
                 <CardContent className="space-y-3">
                   <div className="flex items-start justify-between gap-4">
-                    <div>
+                    <div className="min-w-0">
                       <div className="font-medium">{r.name}</div>
                       <p className="mt-0.5 text-sm text-muted-foreground">{r.message}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{formatRelative(r.created_at)}</p>
                     </div>
                     {r.amount != null ? (
-                      <span className="shrink-0 text-sm tabular-nums text-muted-foreground">
-                        {r.amount}
-                      </span>
+                      <span className="shrink-0 font-semibold tabular-nums">{formatMoney(Number(r.amount))}</span>
                     ) : null}
                   </div>
                   {r.ai_draft ? (
-                    <div className="rounded-md border border-border bg-muted/40 p-3">
-                      <div className="text-xs font-medium uppercase tracking-wide text-primary">
-                        AI triage + suggested reply
+                    <div className="rounded-xl bg-accent/60 p-3 text-accent-foreground">
+                      <div className="flex items-center gap-1.5 text-xs font-semibold">
+                        <Sparkles className="size-3.5" />
+                        {t.aiTitle}
                       </div>
-                      <p className="mt-1 whitespace-pre-line text-sm text-muted-foreground">
-                        {r.ai_draft}
-                      </p>
+                      <p className="mt-1 text-sm whitespace-pre-line opacity-90">{r.ai_draft}</p>
                     </div>
                   ) : null}
                 </CardContent>
@@ -94,13 +88,11 @@ export default async function FeaturePage() {
             ))}
           </div>
         ) : (
-          <Card>
-            <CardContent className="py-10 text-center text-sm text-muted-foreground">
-              No requests yet. Submit your first one above.
-            </CardContent>
-          </Card>
+          <EmptyState icon={Inbox} title={t.empty}>
+            {t.emptyText}
+          </EmptyState>
         )}
-      </div>
+      </section>
     </div>
   );
 }
